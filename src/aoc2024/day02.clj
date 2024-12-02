@@ -19,8 +19,16 @@
     (and (or (increasing? xs) (decreasing? xs))
          (every? #(apply safe-step? %) pairs))))
 
+(defn dampened-safe? [xs]
+  (let [n (count xs)
+        trimmed-xs (map
+                    (fn [k]
+                      (concat (take k xs) (drop (inc k) xs)))
+                    (range n))]
+    (some safe? trimmed-xs)))
+
 (defsolution day02 [input]
   (let [lines (clojure.string/split-lines input)
         data (map parse lines)]
     [(count (filter safe? data))
-     0]))
+     (count (filter #(or (safe? %) (dampened-safe? %)) data))]))
