@@ -1,4 +1,4 @@
-(ns aoc2024.day01
+(ns aoc2024.day02
     (:use aoc2024.driver))
 
 (defn parse [line]
