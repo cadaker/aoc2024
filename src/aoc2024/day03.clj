@@ -4,6 +4,10 @@
 (def MUL-PATTERN #"mul\((\d{1,3}),(\d{1,3})\)")
 (def FULL-PATTERN #"(do\(\))|(don't\(\))|mul\((\d{1,3}),(\d{1,3})\)")
 
+(defn parse-mul [m]
+  [(Integer/valueOf (nth m 1))
+   (Integer/valueOf (nth m 2))])
+
 (defn parse-match [m]
   (let [do-part (nth m 1)
         dont-part (nth m 2)
@@ -28,12 +32,7 @@
                (recur (rest commands) true (+ acc (* a b))))))))
 
 (defsolution day03 [input]
-  (let [mul-matches (re-seq MUL-PATTERN input)
-        factors (map (fn [m]
-                       [(Integer/valueOf (nth m 1))
-                        (Integer/valueOf (nth m 2))])
-                     mul-matches)
-        full-matches (re-seq FULL-PATTERN input)
-        parsed (map parse-match full-matches)]
-    [(reduce + (map (fn [[a b]] (* a b)) factors))
-     (run-commands parsed)]))
+  (let [mul-matches (map parse-mul (re-seq MUL-PATTERN input))
+        full-matches (map parse-match (re-seq FULL-PATTERN input))]
+    [(run-commands mul-matches)
+     (run-commands full-matches)]))
