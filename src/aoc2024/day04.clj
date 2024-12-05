@@ -28,10 +28,33 @@
 (defn scan-directions [grid [row col] pattern]
     (filter #(pattern-scans? grid [row col] % pattern) DIRECTIONS))
 
+(defn has-x-mas? [grid [row col]]
+    (let [row+ (inc row)
+          row- (dec row)
+          col+ (inc col)
+          col- (dec col)]
+        (and (grid-contains? grid row- col-)
+             (grid-contains? grid row+ col+)
+             (= (grid-get grid row col) \A)
+             (or (and (= (grid-get grid row- col-) \M)
+                      (= (grid-get grid row+ col+) \S))
+                 (and (= (grid-get grid row- col-) \S)
+                      (= (grid-get grid row+ col+) \M)))
+             (or (and (= (grid-get grid row- col+) \M)
+                      (= (grid-get grid row+ col-) \S))
+                 (and (= (grid-get grid row- col+) \S)
+                      (= (grid-get grid row+ col-) \M))))))
+
 (defsolution day04 [input]
     (let [grid (parse-input input)
-          good-scans (for [r (range (grid-height grid))
-                           c (range (grid-width grid))]
-                         (count (scan-directions grid [r c] PATTERN)))]
+          height (grid-height grid)
+          width (grid-width grid)
+          good-scans (for [r (range width)
+                           c (range height)]
+                         (count (scan-directions grid [r c] PATTERN)))
+          xmas-poses (for [r (range height)
+                           c (range width)
+                           :when (has-x-mas? grid [r c])]
+                         [r c])]
         [(reduce + good-scans)
-         0]))
+         (count xmas-poses)]))
