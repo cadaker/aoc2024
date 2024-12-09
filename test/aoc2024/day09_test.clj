@@ -74,3 +74,10 @@
   (testing "example"
            (is (= (checksum (defrag-disk (parse-input "2333133121414131402")))
                   1928))))
+
+(deftest defrag-whole-files-test
+  (testing "basic cases"
+           (is (= (defrag-whole-files (parse-input "121"))
+                  [(disk-entry. 0 1 0) (disk-entry. 1 1 1)]))
+           (is (= (defrag-whole-files (parse-input "123"))
+                  [(disk-entry. 0 1 0) (disk-entry. 1 3 3)]))))

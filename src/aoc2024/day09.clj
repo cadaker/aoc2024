@@ -57,15 +57,49 @@
                  (concat new-ends (rest reverse-map))
                  (conj output moved)))))))
 
+(defn can-insert-file? [{space-id :file-id, space-length :length, space-start :start}
+                        {file-id :file-id, file-length :length, file-start :start}]
+  (and (nil? space-id)
+       (< space-start file-start)
+       (>= space-length file-length)))
+
+(defn insertion-point [disk-map file]
+  (let [[head tail] (split-with #(not (can-insert-file? % file)) disk-map)]
+    (if (seq tail)
+      [head tail]
+      nil)))
+
+(defn fill-space [{file-id :file-id, length :length, :as file-entry}
+                  {space-length :length, space-start :start, :as space-entry}]
+  (let [new-file-entry (disk-entry. file-id length space-start)]
+    (if (= length space-length)
+      [new-file-entry []]
+      [new-file-entry [(disk-entry. nil (- space-length length) (+ space-start length))]])))
+
+(defn defrag-whole-files [disk-map]
+  (loop [files-to-go (filter :file-id (reverse disk-map))
+         holes (filter #(not (:file-id %)) disk-map)
+         output []]
+    (if (seq files-to-go)
+      (let [next-file (first files-to-go)]
+        (if-let [[head tail] (insertion-point holes next-file)]
+          (let [[new-file new-holes] (fill-space next-file (first tail))]
+            (recur
+              (rest files-to-go)
+              (-> (vec head) (into new-holes) (into (rest tail)))
+              (conj output new-file)))
+          (recur (rest files-to-go) holes (conj output next-file))))
+      (reverse output))))
+
 (defn triangle [n]
   (/ (* n (inc n)) 2))
 
 (defn checksum [entries]
   (reduce + 0 (map (fn [{file-id :file-id, length :length, start :start}]
                      (* file-id (- (triangle (+ start length -1)) (triangle (dec start)))))
-                   entries)))
+                   (filter :file-id entries))))
 
 (defsolution day09 [input]
   (let [disk-map (parse-input (clojure.string/trimr input))]
     [(checksum (defrag-disk disk-map))
-     0]))
+     (checksum (defrag-whole-files disk-map))]))
