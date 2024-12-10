@@ -20,6 +20,10 @@
 (defn grid-getp [grid [row col]]
   (grid-get grid row col))
 
+(defn grid-assoc [grid row col val]
+  (let [index (+ (* row (grid-width grid)) col)]
+    (assoc-in grid [:data index] val)))
+
 (defrecord GridBuilder [data width])
 
 (defn make-gridbuilder []

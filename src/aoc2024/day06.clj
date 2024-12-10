@@ -41,6 +41,21 @@
 (defn guard-coords [grid guard]
   (into #{} (map :pos (guard-path grid guard))))
 
+(defn path-loops? [guard-path]
+  (loop [path guard-path
+         visited #{}]
+    (cond (nil? (seq path)) false
+          (contains? visited (first path)) true
+          :else (recur (rest path) (conj visited (first path))))))
+
+(defn tweaked-grids [grid guard-start]
+  (let [guard-positions (set (map :pos (guard-path grid guard-start)))]
+    (for [[row col] guard-positions
+          :when (and (= \. (grid-get grid row col))
+                     (not= [row col] (:pos guard-start)))]
+      (grid-assoc grid row col \#))))
+
 (defsolution day06 [input]
   (let [[grid guard] (parse-input input)]
-    [(count (guard-coords grid guard))]))
+    [(count (guard-coords grid guard))
+     (count (filter #(path-loops? (guard-path % guard)) (tweaked-grids grid guard)))]))
