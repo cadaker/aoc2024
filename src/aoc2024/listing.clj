@@ -5,4 +5,5 @@
       aoc2024.day03
       aoc2024.day04
       aoc2024.day09
+      aoc2024.day10
       ))

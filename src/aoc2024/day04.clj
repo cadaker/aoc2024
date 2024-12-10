@@ -1,4 +1,4 @@
-(ns aoc2024.day03
+(ns aoc2024.day04
     (:use aoc2024.driver aoc2024.grid))
 
 (defn parse-input [input]
