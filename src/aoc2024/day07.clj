@@ -10,19 +10,27 @@
 (defn parse-input [input]
   (map parse-line (clojure.string/split-lines input)))
 
-(defn solvable? [{test-value :test, terms :terms}]
+(defn add-and-multiply [lhs rhs]
+  [(+ lhs rhs) (* lhs rhs)])
+
+(defn concat-nums [lhs rhs]
+  (Long/valueOf (str lhs rhs)))
+
+(defn add-multiply-and-concat [lhs rhs]
+  [(+ lhs rhs) (* lhs rhs) (concat-nums lhs rhs)])
+
+(defn solvable? [generator {test-value :test, terms :terms}]
   (loop [stack [[(first terms) (rest terms)]]]
     (let [[cur terms] (peek stack)]
       (cond
        (empty? stack) false
        (and (empty? terms) (= test-value cur)) true
        (empty? terms) (recur (pop stack))
-       :else (recur
-               (-> stack
-                   (pop)
-                   (conj [(+ (first terms) cur) (rest terms)])
-                   (conj [(* (first terms) cur) (rest terms)])))))))
+       :else (let [new-stack-items (map (fn [x] [x (rest terms)])
+                                        (generator cur (first terms)))]
+               (recur (reduce conj (pop stack) new-stack-items)))))))
 
 (defsolution day07 [input]
   (let [equations (parse-input input)]
-    [(reduce + (map :test (filter solvable? equations)))]))
+    [(reduce + (map :test (filter (partial solvable? add-and-multiply) equations)))
+     (reduce + (map :test (filter (partial solvable? add-multiply-and-concat) equations)))]))
