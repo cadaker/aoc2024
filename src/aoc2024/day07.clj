@@ -26,6 +26,7 @@
        (empty? stack) false
        (and (empty? terms) (= test-value cur)) true
        (empty? terms) (recur (pop stack))
+       (> cur test-value) (recur (pop stack))
        :else (let [new-stack-items (map (fn [x] [x (rest terms)])
                                         (generator cur (first terms)))]
                (recur (reduce conj (pop stack) new-stack-items)))))))
