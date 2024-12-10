@@ -18,11 +18,14 @@
                     (rest lines)
                     (conj rules [(Integer/valueOf a) (Integer/valueOf b)]))))))
 
+(defn set-order [rule-set a b]
+    (contains? rule-set [a b]))
+
 (defn valid-update? [rule-set update]
-    (let [ordered-pairs (for [n (range (count update))
-                              m (range (inc n) (count update))]
-                            [(nth update n) (nth update m)])]
-        (not-any? (fn [[a b]] (contains? rule-set [b a])) ordered-pairs)))
+    (= update (sort (partial set-order rule-set) update)))
+
+(defn fix-update [rule-set update]
+    (sort (partial set-order rule-set) update))
 
 (defn middle-page [update]
     (nth update (quot (count update) 2)))
@@ -30,6 +33,8 @@
 (defsolution day05 [input]
     (let [{rules :rules, updates :updates} (parse-input input)
           rule-set (into #{} rules)
-          valid-updates (filter #(valid-update? rule-set %) updates)]
+          valid-updates (filter #(valid-update? rule-set %) updates)
+          invalid-updates (remove #(valid-update? rule-set %) updates)
+          fixed-updates (map #(fix-update rule-set %) invalid-updates)]
         [(reduce + (map middle-page valid-updates))
-         0]))
+         (reduce + (map middle-page fixed-updates))]))
