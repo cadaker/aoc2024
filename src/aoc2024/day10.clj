@@ -22,18 +22,21 @@
 
 (defn scan-trailhead [grid p]
     (loop [stack [p]
-           end-positions #{}]
+           end-positions #{}
+           trailhead-count 0]
         (if (empty? stack)
-            end-positions
+            [end-positions trailhead-count]
             (let [pos (peek stack)
                   stack* (pop stack)]
                 (if (= (grid-getp grid pos) 9)
                     (recur
                         stack*
-                        (conj end-positions pos))
+                        (conj end-positions pos)
+                        (inc trailhead-count))
                     (recur
                         (reduce conj stack* (next-positions grid pos))
-                        end-positions))))))
+                        end-positions
+                        trailhead-count))))))
 
 (defn trailheads [grid]
     (for [row (range (grid-height grid))
@@ -42,6 +45,7 @@
         [row col]))
 
 (defsolution day10 [input]
-    (let [grid (parse-input input)]
-        [(reduce + (map #(count (scan-trailhead grid %)) (trailheads grid)))
-         0]))
+    (let [grid (parse-input input)
+          scans (map #(scan-trailhead grid %) (trailheads grid))]
+        [(reduce + (map #(count (first %)) scans))
+         (reduce + (map #(second %) scans))]))
