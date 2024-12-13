@@ -6,7 +6,7 @@ Button B: X\+(\d+), Y\+(\d+)
 Prize: X=(\d+), Y=(\d+)")
 
 (defn as-int [s]
-  (Integer/valueOf s))
+  (Long/valueOf s))
 
 (defn parse-group [group]
   (let [[_ ax ay bx by px py] (re-find input-pattern group)]
@@ -36,7 +36,14 @@ Prize: X=(\d+), Y=(\d+)")
 (defn tokens [[na nb]]
   (+ (* 3 na) nb))
 
+(defn adjust-machine [offset {a :a, b :b, [px py] :p}]
+  {:a a, :b b, :p [(+ px offset) (+ py offset)]})
+
+(def machine-offset 10000000000000)
+
 (defsolution day13 [input]
-  (let [machines (parse-input input)]
-    ; No tricky cases for part 1!
-    [(reduce + (map tokens (remove nil? (map solve-machine machines))))]))
+  (let [machines (parse-input input)
+        adjusted-machines (map (partial adjust-machine machine-offset) machines)]
+    ; No tricky cases for either part!
+    [(reduce + (map tokens (remove nil? (map solve-machine machines))))
+     (reduce + (map tokens (remove nil? (map solve-machine adjusted-machines))))]))
