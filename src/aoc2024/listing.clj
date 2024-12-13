@@ -10,4 +10,5 @@
       aoc2024.day08
       aoc2024.day09
       aoc2024.day10
+      aoc2024.day13
       ))
