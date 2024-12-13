@@ -1,4 +1,4 @@
-(ns aocd2024.day13
+(ns aoc2024.day13
     (:use aoc2024.driver))
 
 (def input-pattern #"Button A: X\+(\d+), Y\+(\d+)
